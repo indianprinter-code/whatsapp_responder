@@ -174,9 +174,17 @@ def webhook_meta():
         token = request.args.get('hub.verify_token')
         challenge = request.args.get('hub.challenge')
         
+        print(f"Webhook verification attempt:")
+        print(f"  Mode: {mode}")
+        print(f"  Token: {token}")
+        print(f"  Expected token: {WHATSAPP_VERIFY_TOKEN}")
+        print(f"  Challenge: {challenge}")
+        
         if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN:
+            print(f"Verification successful, returning challenge: {challenge}")
             return challenge
         else:
+            print(f"Verification failed - mode: {mode}, token match: {token == WHATSAPP_VERIFY_TOKEN}")
             return 'Forbidden', 403
     
     elif request.method == 'POST':
@@ -242,6 +250,16 @@ def process_message(phone_number, message_text):
     
     # Send response
     send_whatsapp_message(phone_number, answer)
+
+@app.route("/webhook_test")
+def webhook_test():
+    """Simple test to verify webhook endpoint is accessible."""
+    return jsonify({
+        "status": "success",
+        "message": "Webhook endpoint is accessible",
+        "verify_token": WHATSAPP_VERIFY_TOKEN,
+        "provider": WHATSAPP_PROVIDER
+    })
 
 @app.route("/test_webhook")
 def test_webhook():
