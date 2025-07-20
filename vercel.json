@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ],
+  "env": {
+    "SPREADSHEET_ID": "1o31IoLhW67QFG9XAxm3CTpTK6TATe0A7c1lYaIoiLdw",
+    "SHEET_NAME": "Sheet1",
+    "WHATSAPP_VERIFY_TOKEN": "my_whatsapp_verify_token_123"
+  }
+} 
