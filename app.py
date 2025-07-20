@@ -163,8 +163,18 @@ def webhook():
     print(f"Current provider: {WHATSAPP_PROVIDER}")
     print(f"Request args: {request.args}")
     
-    # Simple test - always return a response for GET requests
+    # Handle Meta webhook verification for GET requests
     if request.method == 'GET':
+        mode = request.args.get('hub.mode')
+        token = request.args.get('hub.verify_token')
+        challenge = request.args.get('hub.challenge')
+        
+        # If this is a Meta webhook verification
+        if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN and challenge:
+            print(f"Meta webhook verification successful, returning challenge: {challenge}")
+            return challenge  # Return just the challenge value
+        
+        # Otherwise return debug info
         return jsonify({
             "status": "webhook_working",
             "method": "GET",
@@ -182,26 +192,9 @@ def webhook():
 
 def webhook_meta():
     """Meta WhatsApp Business API webhook."""
+    # GET requests are handled in the main webhook function
     if request.method == 'GET':
-        # Webhook verification
-        mode = request.args.get('hub.mode')
-        token = request.args.get('hub.verify_token')
-        challenge = request.args.get('hub.challenge')
-        
-        print(f"Meta webhook verification attempt:")
-        print(f"  Mode: {mode}")
-        print(f"  Token: {token}")
-        print(f"  Expected token: {WHATSAPP_VERIFY_TOKEN}")
-        print(f"  Challenge: {challenge}")
-        
-        # For now, always return success for testing
-        if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN:
-            print(f"Verification successful, returning challenge: {challenge}")
-            return challenge
-        else:
-            print(f"Verification failed - mode: {mode}, token match: {token == WHATSAPP_VERIFY_TOKEN}")
-            # Return challenge anyway for testing
-            return challenge if challenge else "test_challenge"
+        return 'Method not allowed', 405
     
     elif request.method == 'POST':
         try:
