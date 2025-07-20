@@ -159,11 +159,15 @@ def send_whatsapp_message_twilio(phone_number, message):
 @app.route("/webhook", methods=['GET', 'POST'])
 def webhook():
     """WhatsApp webhook - supports both Meta and Twilio."""
+    print(f"Webhook called with method: {request.method}")
+    print(f"Current provider: {WHATSAPP_PROVIDER}")
+    
     if WHATSAPP_PROVIDER == "META":
         return webhook_meta()
     elif WHATSAPP_PROVIDER == "TWILIO":
         return webhook_twilio()
     else:
+        print(f"Unknown provider: {WHATSAPP_PROVIDER}")
         return 'Unknown provider', 400
 
 def webhook_meta():
@@ -179,6 +183,14 @@ def webhook_meta():
         print(f"  Token: {token}")
         print(f"  Expected token: {WHATSAPP_VERIFY_TOKEN}")
         print(f"  Challenge: {challenge}")
+        
+        # If no parameters, return a simple response for testing
+        if not mode and not token and not challenge:
+            return jsonify({
+                "status": "webhook_accessible",
+                "message": "Webhook endpoint is accessible",
+                "provider": "META"
+            })
         
         if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN:
             print(f"Verification successful, returning challenge: {challenge}")
