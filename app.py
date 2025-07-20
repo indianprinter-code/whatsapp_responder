@@ -169,18 +169,24 @@ def webhook():
         token = request.args.get('hub.verify_token')
         challenge = request.args.get('hub.challenge')
         
+        print(f"Verification check: mode={mode}, token={token}, challenge={challenge}")
+        print(f"Expected token: {WHATSAPP_VERIFY_TOKEN}")
+        
         # If this is a Meta webhook verification
         if mode == 'subscribe' and token == WHATSAPP_VERIFY_TOKEN and challenge:
             print(f"Meta webhook verification successful, returning challenge: {challenge}")
             return challenge  # Return just the challenge value
-        
-        # Otherwise return debug info
-        return jsonify({
-            "status": "webhook_working",
-            "method": "GET",
-            "provider": WHATSAPP_PROVIDER,
-            "args": dict(request.args)
-        })
+        else:
+            print(f"Verification failed - mode: {mode}, token match: {token == WHATSAPP_VERIFY_TOKEN}")
+            # Return debug info
+            return jsonify({
+                "status": "webhook_working",
+                "method": "GET",
+                "provider": WHATSAPP_PROVIDER,
+                "args": dict(request.args),
+                "verification_failed": True,
+                "expected_token": WHATSAPP_VERIFY_TOKEN
+            })
     
     if WHATSAPP_PROVIDER == "META":
         return webhook_meta()
